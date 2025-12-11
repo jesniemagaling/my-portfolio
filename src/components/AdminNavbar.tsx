@@ -11,6 +11,8 @@ import {
 } from 'react';
 import type { Dispatch } from 'react';
 import gsap from 'gsap';
+import { useRouter } from 'next/navigation';
+import { SecondaryButton } from './CustomButtons';
 
 interface AdminNavbarProps {
   mode: 'light' | 'dark';
@@ -23,6 +25,7 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
   const iconsRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => setMounted(true), []);
 
@@ -52,6 +55,17 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
     setMode(newMode);
     document.documentElement.classList.toggle('dark', newMode === 'dark');
     localStorage.setItem('theme', newMode);
+  };
+
+  const logout = async () => {
+    if (confirm('Are you sure you want to log out?')) {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      router.push('/admin/login');
+    }
   };
 
   if (!mounted) return null;
@@ -110,6 +124,7 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
         >
           <Github className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
         </a>
+
         <button onClick={toggleDarkMode}>
           {mode === 'dark' ? (
             <Sun className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
@@ -117,6 +132,9 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
             <Moon className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
           )}
         </button>
+
+        {/* Logout button */}
+        <SecondaryButton onClick={logout}>Logout</SecondaryButton>
       </div>
 
       {/* Mobile toggle */}
@@ -147,6 +165,18 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
               </a>
             </li>
           ))}
+
+          {/* Mobile logout button */}
+          <li>
+            <SecondaryButton
+              onClick={() => {
+                setIsOpen(false);
+                logout();
+              }}
+            >
+              Logout
+            </SecondaryButton>
+          </li>
         </ul>
       </div>
     </nav>

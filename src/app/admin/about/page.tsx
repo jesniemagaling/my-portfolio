@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import aboutApi from '@/lib/adminAboutApi';
 import Modal from '@/components/Modal';
 import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
+import { useRouter } from 'next/navigation';
+import { isAdminLoggedIn } from '@/lib/checkAdmin';
 
 interface Education {
   school: string;
@@ -20,6 +22,8 @@ interface About {
 }
 
 export default function AdminAboutPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
   const [aboutData, setAboutData] = useState<About>({
     id: '',
     about: '',
@@ -41,6 +45,11 @@ export default function AdminAboutPage() {
     startYear: 2022,
     endYear: 2026,
   });
+
+  useEffect(() => {
+    setChecking(false);
+  }, []);
+
   const loadAbout = async () => {
     try {
       const res = await aboutApi.get('/');
@@ -112,6 +121,10 @@ export default function AdminAboutPage() {
       console.error(error);
     }
   };
+
+  if (checking) {
+    return <p>Loading about...</p>;
+  }
 
   return (
     <div>

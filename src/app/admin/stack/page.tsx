@@ -5,6 +5,8 @@ import stackApi from '@/lib/adminStackApi';
 import Modal from '@/components/Modal';
 import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
 import { Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { isAdminLoggedIn } from '@/lib/checkAdmin';
 
 interface TechItem {
   id: string;
@@ -15,6 +17,8 @@ interface TechItem {
 }
 
 export default function TechStackPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
   const [items, setItems] = useState<TechItem[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
@@ -25,6 +29,10 @@ export default function TechStackPage() {
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setChecking(false);
+  }, []);
 
   // Fetch all tech stack items
   const fetchItems = async (signal?: AbortSignal) => {
@@ -120,6 +128,10 @@ export default function TechStackPage() {
       console.error('Error deleting item:', error);
     }
   };
+
+  if (checking) {
+    return <p>Loading stack...</p>;
+  }
 
   return (
     <div>

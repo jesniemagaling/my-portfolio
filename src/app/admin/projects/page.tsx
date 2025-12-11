@@ -6,6 +6,8 @@ import Modal from '@/components/Modal';
 import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
 import { makeSlug } from '@/lib/slugify';
 import { Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { isAdminLoggedIn } from '@/lib/checkAdmin';
 
 interface Project {
   id: string;
@@ -20,6 +22,8 @@ interface Project {
 }
 
 export default function AdminProjects() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
@@ -34,6 +38,10 @@ export default function AdminProjects() {
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    setChecking(false);
+  }, []);
 
   // Fetch all projects
   const fetchProjects = async (signal?: AbortSignal) => {
@@ -153,6 +161,10 @@ export default function AdminProjects() {
       console.error('Error deleting project:', error);
     }
   };
+
+  if (checking) {
+    return <p>Loading projects...</p>;
+  }
 
   return (
     <div>

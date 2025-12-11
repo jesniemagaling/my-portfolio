@@ -5,7 +5,6 @@ import SectionHeader from '@/components/SectionHeader';
 export default function AdminDashboard() {
   return (
     <div className="flex items-center justify-center h-[calc(100vh-64px-64px)] px-4">
-      {/* h-[calc(100vh-64px-64px)] = viewport height minus navbar and footer */}
       <div className="max-w-2xl text-center">
         <SectionHeader
           title="Admin Panel"

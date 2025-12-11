@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       }
 
       toast.success('Logged in successfully!');
-      router.push('/admin/projects');
+      router.push('/admin');
     } catch {
       toast.error('Something went wrong.');
     } finally {
@@ -39,12 +39,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">
+    <div className="flex items-center justify-center h-full">
       <div className="w-full max-w-md p-10 bg-white border border-gray-200 shadow-lg rounded-2xl">
         <h1 className="mb-2 text-3xl font-extrabold text-center text-gray-900">
           Admin
         </h1>
-        <p className="mb-8 text-center text-gray-500">
+        <p className="mb-6 text-center text-gray-500">
           Enter your admin password to access
         </p>
 
@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+            className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
           />
 
           <PrimaryButton

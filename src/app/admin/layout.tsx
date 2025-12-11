@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google';
 import AppThemeProvider from '@/providers/AppThemeProvider';
 import Footer from '@/components/Footer';
 import AdminNavbar from '@/components/AdminNavbar';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -15,11 +16,15 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const pathname = usePathname();
+
+  // Don't show navbar on login page
+  const showNavbar = pathname !== '/admin/login';
 
   return (
     <AppThemeProvider>
       <div className="flex flex-col h-screen bg-primary-light dark:bg-primary-dark">
-        <AdminNavbar mode={mode} setMode={setMode} />
+        {showNavbar && <AdminNavbar mode={mode} setMode={setMode} />}
 
         <main className="flex-1 overflow-auto relative mx-auto w-full max-w-[1440px] px-2 md:px-8">
           {children}

@@ -151,7 +151,7 @@ export default function About() {
           ref={(el) => {
             if (el) aboutTextRefs.current[0] = el;
           }}
-          className="mt-6 mb-2 text-lg text-body md:text-xl"
+          className="mt-6 mb-6 text-lg text-body md:text-xl"
         >
           {aboutData.about}
         </p>
