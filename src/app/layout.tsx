@@ -1,23 +1,23 @@
+'use client';
+
 import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
 import AppThemeProvider from '@/providers/AppThemeProvider';
 import NavbarWithTheme from '@/components/NavbarWithTheme';
 import Footer from '@/components/Footer';
 import { Toaster } from 'react-hot-toast';
-import Head from 'next/head';
+import { usePathname } from 'next/navigation';
 
 const inter = Inter({ subsets: ['latin'] });
-
-export const metadata = {
-  title: 'Jesnie',
-  description: 'My portfolio website',
-};
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin');
+
   return (
     <html lang="en">
       <head>
@@ -41,13 +41,13 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <AppThemeProvider>
-          <NavbarWithTheme />
+          {!isAdmin && <NavbarWithTheme />}
           <div className="bg-primary-light dark:bg-primary-dark">
             <main className="relative mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 md:px-8">
               {children}
             </main>
           </div>
-          <Footer />
+          {!isAdmin && <Footer />}
           <Toaster
             position="top-right"
             toastOptions={{

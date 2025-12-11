@@ -1,19 +1,14 @@
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { adminDB } from '@/lib/firebaseAdmin';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<any> }
-) {
-  return new Response(JSON.stringify({ message: 'Stack API GET endpoint' }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+export async function GET() {
+  try {
+    const snapshot = await adminDB.collection('techstack').get();
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<any> }
-) {
-  return new Response(JSON.stringify({ message: 'POST received' }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+    const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return NextResponse.json(items);
+  } catch (err) {
+    console.error('Error fetching public tech stack:', err);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }

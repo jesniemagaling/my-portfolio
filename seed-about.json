@@ -1,0 +1,12 @@
+{
+  "about": "I’m Jesnie Magaling, 21 years old, from Bulacan, and currently taking up BS in Information Technology at La Consolacion University Philippines. I’m a full-stack developer who can build web applications, from user interfaces to servers and databases, using modern technologies. Recently, I’ve also started exploring artificial intelligence engineering. I enjoy learning new technologies, tackling challenges, and keeping up with the latest trends in development. I’m currently looking for a professional role where I can apply my skills, grow as a developer, and contribute to meaningful projects. If you’re looking for a full-stack web developer, feel free to reach out.",
+  "goal": "To work in a team that creates responsive web applications and AI-powered solutions that can make a real difference in tech communities and organizations.",
+  "education": [
+    {
+      "school": "La Consolacion University Philippines",
+      "degree": "Bachelor of Science in Information Technology",
+      "startYear": 2022,
+      "endYear": 2026
+    }
+  ]
+}

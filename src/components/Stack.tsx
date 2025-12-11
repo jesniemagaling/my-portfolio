@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRef, useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import api from '@/lib/axios';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,118 +19,52 @@ const categories = [
   'Tools',
 ];
 
-const stackItems = [
-  {
-    name: 'Javascript',
-    icon: '/icons/js.svg',
-    category: 'Front-End',
-    link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript',
-  },
-  {
-    name: 'Typescript',
-    icon: '/icons/ts.svg',
-    category: 'Front-End',
-    link: 'https://www.typescriptlang.org/',
-  },
-  {
-    name: 'React',
-    icon: '/icons/react.svg',
-    category: 'Front-End',
-    link: 'https://react.dev/',
-  },
-  {
-    name: 'Next.js',
-    icon: '/icons/next.svg',
-    category: 'Front-End',
-    link: 'https://nextjs.org/',
-  },
-  {
-    name: 'Node.js',
-    icon: '/icons/node.svg',
-    category: 'Back-End',
-    link: 'https://nodejs.org/',
-  },
-  {
-    name: 'Express.js',
-    icon: '/icons/express.svg',
-    category: 'Back-End',
-    link: 'https://expressjs.com/',
-  },
-  {
-    name: 'Nest.js',
-    icon: '/icons/nest.svg',
-    category: 'Back-End',
-    link: 'https://nestjs.com/',
-  },
-  {
-    name: 'Socket.io',
-    icon: '/icons/socket.svg',
-    category: 'Back-End',
-    link: 'https://socket.io/',
-  },
-  {
-    name: 'PostgreSQL',
-    icon: '/icons/postgresql.svg',
-    category: 'Database',
-    link: 'https://www.postgresql.org/',
-  },
-  {
-    name: 'MongoDB',
-    icon: '/icons/mongodb.svg',
-    category: 'Database',
-    link: 'https://www.mongodb.com/',
-  },
-  {
-    name: 'Sass/Scss',
-    icon: '/icons/sass.svg',
-    category: 'Front-End',
-    link: 'https://sass-lang.com/',
-  },
-  {
-    name: 'TailwindCSS',
-    icon: '/icons/tailwindcss.svg',
-    category: 'Front-End',
-    link: 'https://tailwindcss.com/',
-  },
-  {
-    name: 'Figma',
-    icon: '/icons/figma.svg',
-    category: 'Tools',
-    link: 'https://www.figma.com/',
-  },
-  {
-    name: 'Cypress',
-    icon: '/icons/cypress.svg',
-    category: 'Tools',
-    link: 'https://www.cypress.io/',
-  },
-  {
-    name: 'Storybook',
-    icon: '/icons/storybook.svg',
-    category: 'Tools',
-    link: 'https://storybook.js.org/',
-  },
-  {
-    name: 'Git',
-    icon: '/icons/git.svg',
-    category: 'DevOps',
-    link: 'https://git-scm.com/',
-  },
-];
+interface StackItem {
+  id: string;
+  name: string;
+  icon: string;
+  category: string;
+  link?: string;
+}
 
 export default function Stack() {
+  const [stackItems, setStackItems] = useState<StackItem[]>([]);
   const [selected, setSelected] = useState('All');
-  const filtered =
-    selected === 'All'
-      ? stackItems
-      : stackItems.filter((item) => item.category === selected);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<HTMLAnchorElement[]>([]);
 
+  // Fetch stack items from public API
+  useEffect(() => {
+    const fetchStack = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get('/tech-stack'); // public API endpoint
+        setStackItems(res.data);
+      } catch (err: any) {
+        console.error('Error fetching stack:', err);
+        setError('Failed to load tech stack.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStack();
+  }, []);
+
+  const filtered =
+    selected === 'All'
+      ? stackItems
+      : stackItems.filter((item) => item.category === selected);
+
   // GSAP animation
   useEffect(() => {
+    if (loading || !stackItems.length) return;
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -171,7 +106,12 @@ export default function Stack() {
     });
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, stackItems]);
+
+  if (loading) return <p className="mt-10 text-center">Loading stack...</p>;
+  if (error) return <p className="mt-10 text-center text-red-500">{error}</p>;
+  if (!stackItems.length)
+    return <p className="mt-10 text-center">No stack items found.</p>;
 
   return (
     <>
@@ -199,8 +139,8 @@ export default function Stack() {
       <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
         {filtered.map((tech, i) => (
           <a
-            key={tech.name}
-            href={tech.link}
+            key={tech.id}
+            href={tech.link || '#'}
             target="_blank"
             rel="noopener noreferrer"
             ref={(el) => {
@@ -216,7 +156,6 @@ export default function Stack() {
                 className="object-contain transition hover:scale-105"
               />
             </div>
-
             <p className="text-sm font-medium md:text-lg">{tech.name}</p>
           </a>
         ))}

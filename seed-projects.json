@@ -1,0 +1,20 @@
+[
+  {
+    "title": "Portfolio Website",
+    "slug": "portfolio-website",
+    "description": "My personal portfolio built with Next.js, TypeScript, GSAP animations, and more.",
+    "image": "/images/projects/portfolio.png",
+    "tech": ["Next.js", "React", "TailwindCSS"],
+    "linkLive": "https://yourdomain.com",
+    "linkRepo": "https://github.com/username/portfolio"
+  },
+  {
+    "title": "Chat App",
+    "slug": "chat-app",
+    "description": "Real-time chat app using Firebase, React, and Socket.io features.",
+    "image": "/images/projects/chatapp.png",
+    "tech": ["React", "Firebase", "Node.js"],
+    "linkLive": "https://yourchatapp.com",
+    "linkRepo": "https://github.com/username/chat-app"
+  }
+]

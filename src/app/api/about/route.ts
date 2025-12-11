@@ -1,19 +1,23 @@
-import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { adminDB } from '@/lib/firebaseAdmin';
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<any> }
-) {
-  return new Response(JSON.stringify({ message: 'About API GET endpoint' }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+const collection = 'about';
+const docId = 'main';
 
-export async function POST(
-  request: NextRequest,
-  context: { params: Promise<any> }
-) {
-  return new Response(JSON.stringify({ message: 'POST received' }), {
-    headers: { 'Content-Type': 'application/json' },
-  });
+export async function GET() {
+  try {
+    const doc = await adminDB.collection(collection).doc(docId).get();
+    if (!doc.exists) {
+      return NextResponse.json({
+        id: docId,
+        about: '',
+        goal: '',
+        education: [],
+      });
+    }
+    return NextResponse.json({ id: doc.id, ...doc.data() });
+  } catch (error) {
+    console.error('Public GET Error:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
 }

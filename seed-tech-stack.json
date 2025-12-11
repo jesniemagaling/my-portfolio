@@ -1,0 +1,47 @@
+[
+  {
+    "name": "JavaScript",
+    "icon": "/icons/js.svg",
+    "category": "Front-End"
+  },
+  {
+    "name": "TypeScript",
+    "icon": "/icons/ts.svg",
+    "category": "Front-End"
+  },
+  {
+    "name": "React",
+    "icon": "/icons/react.svg",
+    "category": "Front-End"
+  },
+  {
+    "name": "Next.js",
+    "icon": "/icons/next.svg",
+    "category": "Front-End"
+  },
+  {
+    "name": "Node.js",
+    "icon": "/icons/node.svg",
+    "category": "Back-End"
+  },
+  {
+    "name": "Express.js",
+    "icon": "/icons/express.svg",
+    "category": "Back-End"
+  },
+  {
+    "name": "MongoDB",
+    "icon": "/icons/mongodb.svg",
+    "category": "Database"
+  },
+  {
+    "name": "PostgreSQL",
+    "icon": "/icons/postgresql.svg",
+    "category": "Database"
+  },
+  {
+    "name": "TailwindCSS",
+    "icon": "/icons/tailwindcss.svg",
+    "category": "Front-End"
+  }
+]

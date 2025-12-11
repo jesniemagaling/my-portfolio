@@ -1,13 +1,30 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
+import api from '@/lib/axios';
 import SectionHeader from '@/components/SectionHeader';
-import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+interface Education {
+  school: string;
+  degree: string;
+  startYear: number;
+  endYear: number;
+}
+
+interface AboutData {
+  id: string;
+  about: string;
+  goal: string;
+  education: Education[];
+}
+
 export default function About() {
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+
   const aboutHeaderRef = useRef<HTMLDivElement>(null);
   const aboutTextRefs = useRef<HTMLParagraphElement[]>([]);
 
@@ -17,8 +34,24 @@ export default function About() {
   const eduHeaderRef = useRef<HTMLDivElement>(null);
   const eduItemsRef = useRef<HTMLDivElement[]>([]);
 
+  // Fetch About Data from Firebase API
   useEffect(() => {
-    // About Section Animation
+    const fetchAbout = async () => {
+      try {
+        const res = await api.get('/about');
+        setAboutData(res.data);
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+      }
+    };
+    fetchAbout();
+  }, []);
+
+  // GSAP animations
+  useEffect(() => {
+    if (!aboutData) return;
+
+    // About Section
     if (aboutHeaderRef.current) {
       gsap.fromTo(
         aboutHeaderRef.current,
@@ -46,7 +79,7 @@ export default function About() {
       }
     );
 
-    // Goal Section Animation
+    // Goal Section
     if (goalHeaderRef.current && goalTextRef.current) {
       gsap.fromTo(
         goalHeaderRef.current,
@@ -73,7 +106,7 @@ export default function About() {
       );
     }
 
-    // Education Section Animation
+    // Education Section
     if (eduHeaderRef.current) {
       gsap.fromTo(
         eduHeaderRef.current,
@@ -100,10 +133,12 @@ export default function About() {
         scrollTrigger: { trigger: eduHeaderRef.current, start: 'top 75%' },
       }
     );
-  }, []);
+  }, [aboutData]);
 
   aboutTextRefs.current = [];
   eduItemsRef.current = [];
+
+  if (!aboutData) return null;
 
   return (
     <div className="my-36 grid grid-cols-1 gap-[46px] md:grid-cols-2 lg:gap-[84px]">
@@ -113,29 +148,12 @@ export default function About() {
           <SectionHeader title="About Me" />
         </div>
         <p
-          ref={(el: HTMLParagraphElement | null) => {
+          ref={(el) => {
             if (el) aboutTextRefs.current[0] = el;
           }}
           className="mt-6 mb-2 text-lg text-body md:text-xl"
         >
-          I’m Jesnie Magaling, 21 years old, from Bulacan, and currently taking
-          up BS in Information Technology at La Consolacion University
-          Philippines. I’m a full-stack developer who can build web
-          applications, from user interfaces to servers and databases, using
-          modern technologies. Recently, I’ve also started exploring artificial
-          intelligence engineering.
-        </p>
-        <p
-          ref={(el: HTMLParagraphElement | null) => {
-            if (el) aboutTextRefs.current[1] = el;
-          }}
-          className="mb-6 text-lg text-body md:text-xl"
-        >
-          I enjoy learning new technologies, tackling challenges, and keeping up
-          with the latest trends in development. I’m currently looking for a
-          professional role where I can apply my skills, grow as a developer,
-          and contribute to meaningful projects. If you’re looking for a
-          full-stack web developer, feel free to reach out.
+          {aboutData.about}
         </p>
 
         <div>
@@ -146,9 +164,7 @@ export default function About() {
             My Goal
           </h2>
           <p ref={goalTextRef} className="mt-2 text-lg text-body md:text-xl">
-            To work in a team that creates responsive web applications and
-            AI-powered solutions that can make a real difference in tech
-            communities and organizations.
+            {aboutData.goal}
           </p>
         </div>
       </div>
@@ -159,39 +175,23 @@ export default function About() {
           <SectionHeader title="Education" />
         </div>
 
-        <div
-          ref={(el: HTMLDivElement | null) => {
-            if (el) eduItemsRef.current[0] = el;
-          }}
-          className="mt-5"
-        >
-          <h2 className="text-xl font-semibold md:text-2xl">
-            La Consolacion University Philippines
-          </h2>
-          <p className="mt-2 mb-4 text-lg text-body md:text-xl">
-            Bachelor of Science in Information Technology
-          </p>
-          <h3 className="text-lg font-semibold text-body md:text-xl">
-            2022 - 2026
-          </h3>
-        </div>
-
-        <div
-          ref={(el: HTMLDivElement | null) => {
-            if (el) eduItemsRef.current[1] = el;
-          }}
-          className="mt-4"
-        >
-          <h2 className="text-xl font-semibold md:text-2xl">
-            La Consolacion University Philippines
-          </h2>
-          <p className="mt-2 mb-4 text-lg text-body md:text-xl">
-            Senior High School
-          </p>
-          <h3 className="text-lg font-semibold text-body md:text-xl">
-            2020 - 2022
-          </h3>
-        </div>
+        {aboutData.education.map((edu, i) => (
+          <div
+            key={i}
+            ref={(el) => {
+              if (el) eduItemsRef.current[i] = el;
+            }}
+            className="mt-5"
+          >
+            <h2 className="text-xl font-semibold md:text-2xl">{edu.school}</h2>
+            <p className="mt-2 mb-4 text-lg text-body md:text-xl">
+              {edu.degree}
+            </p>
+            <h3 className="text-lg font-semibold text-body md:text-xl">
+              {edu.startYear} - {edu.endYear}
+            </h3>
+          </div>
+        ))}
       </div>
     </div>
   );
