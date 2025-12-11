@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import stackApi from '@/lib/adminStackApi';
 import Modal from '@/components/Modal';
 import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
+import { Upload } from 'lucide-react';
 
 interface TechItem {
   id: string;
@@ -59,6 +60,36 @@ export default function TechStackPage() {
     setModalOpen(true);
   };
 
+  // File upload + preview
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((prev) => ({ ...prev, icon: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+
+    // Upload to server
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload-icon', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setForm((prev) => ({ ...prev, icon: data.url })); // final URL for saving
+      }
+    } catch (err) {
+      console.error('Upload failed', err);
+    }
+  };
+
   const saveItem = async () => {
     if (!form.name || !form.icon) return;
     setLoading(true);
@@ -105,9 +136,15 @@ export default function TechStackPage() {
             key={item.id}
             className="flex items-center justify-between p-4 border rounded border-gray-300 dark:border-[rgba(255,255,255,0.06)]"
           >
-            <div>
+            <div className="flex items-center gap-4">
+              {item.icon && (
+                <img
+                  src={item.icon}
+                  alt={item.name}
+                  className="object-contain w-8 h-8"
+                />
+              )}
               <p className="font-medium">{item.name}</p>
-              <p className="text-sm text-gray-500">{item.icon}</p>
             </div>
             <div className="flex gap-2 ml-2">
               <PrimaryButton onClick={() => handleEdit(item)}>
@@ -125,38 +162,84 @@ export default function TechStackPage() {
       {modalOpen && (
         <Modal
           open={modalOpen}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false);
+            setForm({ name: '', icon: '', category: '', link: '' });
+            setEditId(null);
+          }}
           title={editId ? 'Edit Tech Stack' : 'Add Tech Stack'}
         >
           <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Tech name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Icon URL"
-              value={form.icon}
-              onChange={(e) => setForm({ ...form, icon: e.target.value })}
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Category"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Link"
-              value={form.link}
-              onChange={(e) => setForm({ ...form, link: e.target.value })}
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
+            {/* Icon Upload */}
+            <div className="flex flex-col items-center justify-center flex-1 min-w-[250px] mt-2">
+              <label
+                htmlFor="icon"
+                className="flex flex-col items-center justify-center w-full h-32 p-4 text-gray-500 transition border-2 border-gray-300 border-dashed cursor-pointer rounded-xl hover:border-gray-400"
+              >
+                {form.icon ? (
+                  <img
+                    src={form.icon}
+                    alt="Icon preview"
+                    className="object-contain w-16 h-16 rounded-xl"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <Upload size={28} strokeWidth={1.5} className="mb-2" />
+                    <span className="font-medium text-gray-500">
+                      Upload Icon
+                    </span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  id="icon"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
+              {loading && (
+                <p className="mt-2 text-sm text-gray-500">Uploading...</p>
+              )}
+            </div>
+
+            {/* Tech Name */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">Tech Name</label>
+              <input
+                type="text"
+                placeholder="Enter tech name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+              />
+            </div>
+
+            {/* Category */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">Category</label>
+              <input
+                type="text"
+                placeholder="Enter category"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+                className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+              />
+            </div>
+
+            {/* Link */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">Link</label>
+              <input
+                type="text"
+                placeholder="Enter link URL"
+                value={form.link}
+                onChange={(e) => setForm({ ...form, link: e.target.value })}
+                className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+              />
+            </div>
+
+            {/* Actions */}
             <div className="flex justify-end gap-2 mt-3">
               <SecondaryButton
                 onClick={() => {

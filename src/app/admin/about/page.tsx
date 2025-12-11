@@ -43,11 +43,14 @@ export default function AdminAboutPage() {
   });
   const loadAbout = async () => {
     try {
-      // Use aboutApi if you want admin access; or api.get('/about') for public read
       const res = await aboutApi.get('/');
       setAboutData(res.data);
-    } catch (error) {
-      console.error('Error fetching about:', error);
+    } catch (error: any) {
+      if (error.code !== 'ECONNABORTED') {
+        console.error('Error fetching about:', error);
+      } else {
+        console.log('Request was aborted, probably due to page navigation.');
+      }
     }
   };
 
@@ -190,46 +193,66 @@ export default function AdminAboutPage() {
           />
         ) : (
           <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="School"
-              value={eduForm.school}
-              onChange={(e) =>
-                setEduForm({ ...eduForm, school: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Degree"
-              value={eduForm.degree}
-              onChange={(e) =>
-                setEduForm({ ...eduForm, degree: e.target.value })
-              }
-              className="w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
-            />
+            {/* School */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">School</label>
+              <input
+                type="text"
+                placeholder="Enter school name"
+                value={eduForm.school}
+                onChange={(e) =>
+                  setEduForm({ ...eduForm, school: e.target.value })
+                }
+                className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+              />
+            </div>
+
+            {/* Degree */}
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium">Degree</label>
+              <input
+                type="text"
+                placeholder="Enter degree or program"
+                value={eduForm.degree}
+                onChange={(e) =>
+                  setEduForm({ ...eduForm, degree: e.target.value })
+                }
+                className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+              />
+            </div>
+
+            {/* Start & End Year */}
             <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Start Year"
-                value={eduForm.startYear}
-                onChange={(e) =>
-                  setEduForm({
-                    ...eduForm,
-                    startYear: parseInt(e.target.value),
-                  })
-                }
-                className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-md placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400 bg-transparent"
-              />
-              <input
-                type="number"
-                placeholder="End Year"
-                value={eduForm.endYear}
-                onChange={(e) =>
-                  setEduForm({ ...eduForm, endYear: parseInt(e.target.value) })
-                }
-                className="w-1/2 px-3 py-2 text-sm border border-gray-300 rounded-md placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400 bg-transparent"
-              />
+              <div className="flex flex-col w-1/2">
+                <label className="mb-1 text-sm font-medium">Start Year</label>
+                <input
+                  type="number"
+                  placeholder="YYYY"
+                  value={eduForm.startYear}
+                  onChange={(e) =>
+                    setEduForm({
+                      ...eduForm,
+                      startYear: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+                />
+              </div>
+              <div className="flex flex-col w-1/2">
+                <label className="mb-1 text-sm font-medium">End Year</label>
+                <input
+                  type="number"
+                  placeholder="YYYY"
+                  value={eduForm.endYear}
+                  onChange={(e) =>
+                    setEduForm({
+                      ...eduForm,
+                      endYear: parseInt(e.target.value),
+                    })
+                  }
+                  className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
+                />
+              </div>
             </div>
           </div>
         )}

@@ -21,7 +21,7 @@ export default function AdminLayout({
       <div className="flex flex-col h-screen bg-primary-light dark:bg-primary-dark">
         <AdminNavbar mode={mode} setMode={setMode} />
 
-        <main className="flex-1 overflow-auto relative mx-auto w-full max-w-[1440px] px-4 md:px-8">
+        <main className="flex-1 overflow-auto relative mx-auto w-full max-w-[1440px] px-2 md:px-8">
           {children}
         </main>
 

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import toast from 'react-hot-toast';
+import { PrimaryButton } from '@/components/CustomButtons';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -17,10 +17,8 @@ export default function AdminLoginPage() {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // <-- REQUIRED!
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ password }),
       });
 
@@ -32,8 +30,8 @@ export default function AdminLoginPage() {
       }
 
       toast.success('Logged in successfully!');
-      router.push('/admin/projects'); // redirect after login
-    } catch (err) {
+      router.push('/admin/projects');
+    } catch {
       toast.error('Something went wrong.');
     } finally {
       setLoading(false);
@@ -41,34 +39,34 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <Box className="flex items-center justify-center h-screen p-4">
-      <Paper className="w-full max-w-sm p-8" elevation={6}>
-        <Typography variant="h5" className="mb-4 font-bold text-center">
-          Admin Login
-        </Typography>
+    <div className="flex items-center justify-center min-h-screen px-4 bg-gray-50">
+      <div className="w-full max-w-md p-10 bg-white border border-gray-200 shadow-lg rounded-2xl">
+        <h1 className="mb-2 text-3xl font-extrabold text-center text-gray-900">
+          Admin
+        </h1>
+        <p className="mb-8 text-center text-gray-500">
+          Enter your admin password to access
+        </p>
 
-        <form onSubmit={handleLogin}>
-          <TextField
+        <form onSubmit={handleLogin} className="space-y-5">
+          <input
             type="password"
-            label="Admin Password"
-            fullWidth
-            required
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mb-4"
+            required
+            className="w-full px-4 py-3 text-gray-900 placeholder-gray-400 border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
           />
 
-          <Button
+          <PrimaryButton
             type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
             disabled={loading}
+            className="w-full py-3 text-lg font-medium"
           >
             {loading ? 'Logging in...' : 'Login'}
-          </Button>
+          </PrimaryButton>
         </form>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 }
