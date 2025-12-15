@@ -23,7 +23,6 @@ export default function HomePage() {
       <section id="contact">
         <Contact />
       </section>
-      <ChatBot />
     </main>
   );
 }
