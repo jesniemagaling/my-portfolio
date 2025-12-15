@@ -3,6 +3,7 @@ import About from '@/components/About';
 import Projects from '@/components/Projects';
 import Stack from '@/components/Stack';
 import Contact from '@/components/Contact';
+import ChatBot from '@/components/ChatBot';
 
 export default function HomePage() {
   return (
@@ -22,6 +23,7 @@ export default function HomePage() {
       <section id="contact">
         <Contact />
       </section>
+      <ChatBot />
     </main>
   );
 }
