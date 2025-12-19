@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Jesnie Magaling</title>
+        <title>Jesnie</title>
         <meta name="description" content="My portfolio website" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
