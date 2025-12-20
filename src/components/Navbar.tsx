@@ -69,6 +69,8 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
 
   if (!mounted) return null;
 
+  const links = ['Projects', 'Stack', 'About', 'Contact'];
+
   return (
     <nav className="fixed top-0 left-0 z-50 flex items-center justify-between w-full px-4 py-3 bg-primary-light dark:bg-primary-dark md:px-8">
       <div className="flex max-w-[1440px] items-center">
@@ -97,7 +99,7 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
 
       {/* Desktop menu */}
       <ul ref={linksRef} className="hidden gap-8 text-sm font-bold md:flex">
-        {['Stack', 'Projects', 'About', 'Contact'].map((link) => (
+        {links.map((link) => (
           <li key={link}>
             <a
               href={`#${link.toLowerCase()}`}
@@ -149,7 +151,7 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
         }`}
       >
         <ul className="flex flex-col p-6 space-y-4 text-sm text-gray-300">
-          {['Stack', 'Projects', 'About', 'Contact'].map((link) => (
+          {links.map((link) => (
             <li key={link}>
               <a
                 href={`#${link.toLowerCase()}`}

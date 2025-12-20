@@ -1,7 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import '@/styles/globals.css';
-import { useState } from 'react';
 import { Inter } from 'next/font/google';
 import AppThemeProvider from '@/providers/AppThemeProvider';
 import Footer from '@/components/Footer';
@@ -15,11 +15,20 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<'light' | 'dark'>('light');
   const pathname = usePathname();
 
   // Don't show navbar on login page
   const showNavbar = pathname !== '/admin/login';
+
+  useEffect(() => {
+    setMounted(true);
+    const isDark = document.documentElement.classList.contains('dark');
+    setMode(isDark ? 'dark' : 'light');
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <AppThemeProvider>
