@@ -10,14 +10,7 @@ import api from '@/lib/axios';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const categories = [
-  'All',
-  'Front-End',
-  'Back-End',
-  'Database',
-  'DevOps',
-  'Tools',
-];
+const categories = ['All', 'Front-End', 'Back-End', 'Database', 'Ecosystem'];
 
 interface StackItem {
   id: string;
