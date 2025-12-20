@@ -22,10 +22,12 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
   const linksRef = useRef<HTMLUListElement>(null);
   const iconsRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
   useLayoutEffect(() => {
@@ -52,10 +54,15 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
   }, []);
 
   const toggleDarkMode = () => {
-    const newMode = mode === 'dark' ? 'light' : 'dark';
-    setMode(newMode);
+    const currentlyDark = document.documentElement.classList.contains('dark');
+    const newMode = currentlyDark ? 'light' : 'dark';
+
     document.documentElement.classList.toggle('dark', newMode === 'dark');
     localStorage.setItem('theme', newMode);
+
+    setMode(newMode);
+    setIsDark(!currentlyDark);
+    setIsOpen(false);
   };
 
   const handleLinkClick = () => setIsOpen(false);
@@ -66,21 +73,25 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
     <nav className="fixed top-0 left-0 z-50 flex items-center justify-between w-full px-4 py-3 bg-primary-light dark:bg-primary-dark md:px-8">
       <div className="flex max-w-[1440px] items-center">
         <a ref={logoRef} className="w-[36px]" href="#">
-          {mode === 'dark' ? (
-            <Image
-              src="/icons/dark-logo.png"
-              alt="jesnie-icon"
-              width={36}
-              height={36}
-            />
-          ) : (
-            <Image
-              src="/icons/light-logo.png"
-              alt="jesnie-icon"
-              width={36}
-              height={36}
-            />
-          )}
+          {/* Light logo */}
+          <Image
+            src="/icons/light-logo.png"
+            alt="jesnie-icon"
+            width={36}
+            height={36}
+            className="block dark:hidden"
+            priority
+          />
+
+          {/* Dark logo */}
+          <Image
+            src="/icons/dark-logo.png"
+            alt="jesnie-icon"
+            width={36}
+            height={36}
+            className="hidden dark:block"
+            priority
+          />
         </a>
       </div>
 
@@ -111,10 +122,10 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
           <Github className="text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300 md:h-6 md:w-6" />
         </a>
         <button onClick={toggleDarkMode}>
-          {mode === 'dark' ? (
-            <Sun className="text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300 md:h-6 md:w-6" />
+          {isDark ? (
+            <Sun className="text-black md:h-6 md:w-6 dark:text-white" />
           ) : (
-            <Moon className="text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300 md:h-6 md:w-6" />
+            <Moon className="text-black md:h-6 md:w-6 dark:text-white" />
           )}
         </button>
       </div>
@@ -129,7 +140,9 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
 
       {/* Mobile menu */}
       <div
-        className={`absolute left-0 top-14 z-10 w-full transform bg-primary-light transition-all duration-300 dark:bg-primary-dark md:hidden ${
+        className={`absolute left-0 top-14 z-10 w-full transform bg-primary-light
+        transition-[transform,opacity] duration-300
+        dark:bg-primary-dark md:hidden ${
           isOpen
             ? 'translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-5 opacity-0'
@@ -161,10 +174,10 @@ export default function Navbar({ mode, setMode }: NavbarProps) {
             aria-label="Toggle dark mode"
             className="focus:outline-none"
           >
-            {mode === 'dark' ? (
-              <Sun className="text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300 md:h-6 md:w-6" />
+            {isDark ? (
+              <Sun className="text-black md:h-6 md:w-6 dark:text-white" />
             ) : (
-              <Moon className="text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300 md:h-6 md:w-6" />
+              <Moon className="text-black md:h-6 md:w-6 dark:text-white" />
             )}
           </button>
         </div>

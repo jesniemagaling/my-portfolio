@@ -24,10 +24,14 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
   const linksRef = useRef<HTMLUListElement>(null);
   const iconsRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -51,10 +55,15 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
   }, []);
 
   const toggleDarkMode = () => {
-    const newMode = mode === 'dark' ? 'light' : 'dark';
-    setMode(newMode);
+    const currentlyDark = document.documentElement.classList.contains('dark');
+    const newMode = currentlyDark ? 'light' : 'dark';
+
     document.documentElement.classList.toggle('dark', newMode === 'dark');
     localStorage.setItem('theme', newMode);
+
+    setMode(newMode);
+    setIsDark(!currentlyDark);
+    setIsOpen(false);
   };
 
   const logout = async () => {
@@ -80,21 +89,25 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
     <nav className="fixed top-0 left-0 z-50 flex items-center justify-between w-full px-4 py-3 bg-primary-light dark:bg-primary-dark md:px-8">
       <div className="flex max-w-[1440px] items-center">
         <a ref={logoRef} className="w-[36px]" href="/admin">
-          {mode === 'dark' ? (
-            <Image
-              src="/icons/dark-logo.png"
-              alt="admin-logo"
-              width={36}
-              height={36}
-            />
-          ) : (
-            <Image
-              src="/icons/light-logo.png"
-              alt="admin-logo"
-              width={36}
-              height={36}
-            />
-          )}
+          {/* Light logo */}
+          <Image
+            src="/icons/light-logo.png"
+            alt="admin-logo"
+            width={36}
+            height={36}
+            className="block dark:hidden"
+            priority
+          />
+
+          {/* Dark logo */}
+          <Image
+            src="/icons/dark-logo.png"
+            alt="admin-logo"
+            width={36}
+            height={36}
+            className="hidden dark:block"
+            priority
+          />
         </a>
       </div>
 
@@ -125,11 +138,11 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
           <Github className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
         </a>
 
-        <button onClick={toggleDarkMode}>
-          {mode === 'dark' ? (
-            <Sun className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
+        <button onClick={toggleDarkMode} aria-label="Toggle dark mode">
+          {isDark ? (
+            <Sun className="w-6 h-6 text-black dark:text-white" />
           ) : (
-            <Moon className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
+            <Moon className="w-6 h-6 text-black dark:text-white" />
           )}
         </button>
 
@@ -147,7 +160,8 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
 
       {/* Mobile menu */}
       <div
-        className={`absolute left-0 top-14 z-10 w-full transform bg-primary-light dark:bg-primary-dark transition-all duration-300 md:hidden ${
+        className={`absolute left-0 top-14 z-10 w-full transform bg-primary-light dark:bg-primary-dark
+        transition-[transform,opacity] duration-300 md:hidden ${
           isOpen
             ? 'translate-y-0 opacity-100'
             : '-translate-y-5 opacity-0 pointer-events-none'
@@ -166,8 +180,28 @@ export default function AdminNavbar({ mode, setMode }: AdminNavbarProps) {
             </li>
           ))}
 
+          {/* Mobile GitHub + Theme toggle */}
+          <li className="flex items-center gap-4 pt-2">
+            <a
+              href="https://github.com/jesniemagaling"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+            >
+              <Github className="w-6 h-6 text-black transition-colors duration-100 hover:text-gray-700 dark:text-white dark:hover:text-gray-300" />
+            </a>
+
+            <button onClick={toggleDarkMode} aria-label="Toggle dark mode">
+              {isDark ? (
+                <Sun className="w-6 h-6 text-black dark:text-white" />
+              ) : (
+                <Moon className="w-6 h-6 text-black dark:text-white" />
+              )}
+            </button>
+          </li>
+
           {/* Mobile logout button */}
-          <li>
+          <li className="pt-2">
             <SecondaryButton
               onClick={() => {
                 setIsOpen(false);
