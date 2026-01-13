@@ -47,13 +47,13 @@ export default function RootLayout({
         <link
           rel="icon"
           type="image/png"
-          href="/icons/light-logo.png"
+          href="/icons/dark-logo.png"
           media="(prefers-color-scheme: light)"
         />
         <link
           rel="icon"
           type="image/png"
-          href="/icons/dark-logo.png"
+          href="/icons/light-logo.png"
           media="(prefers-color-scheme: dark)"
         />
       </head>
