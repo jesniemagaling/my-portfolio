@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import SectionHeader from '@/components/SectionHeader';
-import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
-import Image from 'next/image';
-import { useRef, useState, useEffect } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import api from '@/lib/axios';
+import SectionHeader from "@/components/SectionHeader";
+import { PrimaryButton, SecondaryButton } from "@/components/CustomButtons";
+import Image from "next/image";
+import { useRef, useState, useEffect } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import api from "@/lib/axios";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const categories = ['All', 'Front-End', 'Back-End', 'Database', 'Ecosystem'];
+const categories = ["All", "Front-End", "Back-End", "Database", "Ecosystem"];
 
 interface StackItem {
   id: string;
@@ -22,7 +22,7 @@ interface StackItem {
 
 export default function Stack() {
   const [stackItems, setStackItems] = useState<StackItem[]>([]);
-  const [selected, setSelected] = useState('All');
+  const [selected, setSelected] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,11 +36,11 @@ export default function Stack() {
       setLoading(true);
       setError(null);
       try {
-        const res = await api.get('/tech-stack'); // public API endpoint
+        const res = await api.get("/tech-stack"); // public API endpoint
         setStackItems(res.data);
       } catch (err: any) {
-        console.error('Error fetching stack:', err);
-        setError('Failed to load tech stack.');
+        console.error("Error fetching stack:", err);
+        setError("Failed to load tech stack.");
       } finally {
         setLoading(false);
       }
@@ -50,7 +50,7 @@ export default function Stack() {
   }, []);
 
   const filtered =
-    selected === 'All'
+    selected === "All"
       ? stackItems
       : stackItems.filter((item) => item.category === selected);
 
@@ -62,8 +62,8 @@ export default function Stack() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: headerRef.current,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
+          start: "top 85%",
+          toggleActions: "play none none none",
           once: true,
         },
       });
@@ -72,7 +72,7 @@ export default function Stack() {
       tl.fromTo(
         headerRef.current,
         { y: 40, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }
+        { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
       );
 
       // Buttons animation
@@ -83,25 +83,55 @@ export default function Stack() {
             y: 20,
             opacity: 0,
             duration: 0.4,
-            ease: 'power2.out',
+            ease: "power2.out",
             stagger: 0.05,
           },
-          '-=0.2'
+          "-=0.2",
         );
       }
 
       // Stack items animation
       tl.from(
         itemsRef.current,
-        { y: 30, opacity: 0, duration: 0.6, ease: 'power2.out', stagger: 0.05 },
-        '-=0.2'
+        { y: 30, opacity: 0, duration: 0.6, ease: "power2.out", stagger: 0.05 },
+        "-=0.2",
       );
     });
 
     return () => ctx.revert();
   }, [loading, stackItems]);
 
-  if (loading) return <p className="mt-10 text-center">Loading stack...</p>;
+  if (loading)
+    return (
+      <div className="animate-pulse">
+        {/* Header skeleton */}
+        <div className="space-y-3">
+          <div className="h-9 w-40 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-4 w-full max-w-xl rounded-full bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+
+        {/* Category button skeletons */}
+        <div className="flex flex-wrap gap-2 mt-5 mb-10">
+          {[48, 64, 72, 64, 80].map((w, i) => (
+            <div
+              key={i}
+              className="h-9 rounded-lg bg-gray-200 dark:bg-secondary-dark"
+              style={{ width: `${w}px` }}
+            />
+          ))}
+        </div>
+
+        {/* Grid icon skeletons */}
+        <div className="grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div key={i} className="flex flex-col items-center gap-2 py-4">
+              <div className="h-16 w-16 rounded-xl bg-gray-200 dark:bg-secondary-dark" />
+              <div className="h-4 w-12 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   if (error) return <p className="mt-10 text-center text-red-500">{error}</p>;
   if (!stackItems.length)
     return <p className="mt-10 text-center">No stack items found.</p>;
@@ -125,7 +155,7 @@ export default function Stack() {
             <SecondaryButton key={cat} onClick={() => setSelected(cat)}>
               {cat}
             </SecondaryButton>
-          )
+          ),
         )}
       </div>
 
@@ -133,7 +163,7 @@ export default function Stack() {
         {filtered.map((tech, i) => (
           <a
             key={tech.id}
-            href={tech.link || '#'}
+            href={tech.link || "#"}
             target="_blank"
             rel="noopener noreferrer"
             ref={(el) => {

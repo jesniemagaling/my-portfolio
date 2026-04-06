@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import api from '@/lib/axios';
-import SectionHeader from '@/components/SectionHeader';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useRef, useState } from "react";
+import api from "@/lib/axios";
+import SectionHeader from "@/components/SectionHeader";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -38,10 +38,10 @@ export default function About() {
   useEffect(() => {
     const fetchAbout = async () => {
       try {
-        const res = await api.get('/about');
+        const res = await api.get("/about");
         setAboutData(res.data);
       } catch (error) {
-        console.error('Error fetching about data:', error);
+        console.error("Error fetching about data:", error);
       }
     };
     fetchAbout();
@@ -60,9 +60,9 @@ export default function About() {
           y: 0,
           opacity: 1,
           duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: aboutHeaderRef.current, start: 'top 80%' },
-        }
+          ease: "power3.out",
+          scrollTrigger: { trigger: aboutHeaderRef.current, start: "top 80%" },
+        },
       );
     }
 
@@ -74,9 +74,9 @@ export default function About() {
         opacity: 1,
         duration: 0.8,
         stagger: 0.3,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: aboutHeaderRef.current, start: 'top 70%' },
-      }
+        ease: "power3.out",
+        scrollTrigger: { trigger: aboutHeaderRef.current, start: "top 70%" },
+      },
     );
 
     // Goal Section
@@ -88,9 +88,9 @@ export default function About() {
           y: 0,
           opacity: 1,
           duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: goalHeaderRef.current, start: 'top 80%' },
-        }
+          ease: "power3.out",
+          scrollTrigger: { trigger: goalHeaderRef.current, start: "top 80%" },
+        },
       );
 
       gsap.fromTo(
@@ -100,9 +100,9 @@ export default function About() {
           y: 0,
           opacity: 1,
           duration: 0.8,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: goalHeaderRef.current, start: 'top 75%' },
-        }
+          ease: "power3.out",
+          scrollTrigger: { trigger: goalHeaderRef.current, start: "top 75%" },
+        },
       );
     }
 
@@ -115,9 +115,9 @@ export default function About() {
           y: 0,
           opacity: 1,
           duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: eduHeaderRef.current, start: 'top 80%' },
-        }
+          ease: "power3.out",
+          scrollTrigger: { trigger: eduHeaderRef.current, start: "top 80%" },
+        },
       );
     }
 
@@ -129,16 +129,54 @@ export default function About() {
         opacity: 1,
         duration: 0.8,
         stagger: 0.25,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: eduHeaderRef.current, start: 'top 75%' },
-      }
+        ease: "power3.out",
+        scrollTrigger: { trigger: eduHeaderRef.current, start: "top 75%" },
+      },
     );
   }, [aboutData]);
 
   aboutTextRefs.current = [];
   eduItemsRef.current = [];
 
-  if (!aboutData) return null;
+  if (!aboutData)
+    return (
+      <div className="my-36 grid grid-cols-1 gap-[46px] md:grid-cols-2 lg:gap-[84px] animate-pulse">
+        {/* Left column skeleton — About Me + Goal */}
+        <div className="max-w-[655px] space-y-6">
+          {/* "About Me" heading */}
+          <div className="h-8 w-32 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          {/* About paragraph lines */}
+          <div className="space-y-2.5">
+            <div className="h-4 w-full rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            <div className="h-4 w-[97%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            <div className="h-4 w-[90%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            <div className="h-4 w-3/4 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+          </div>
+          {/* "My Goal" heading */}
+          <div className="h-7 w-28 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          {/* Goal paragraph lines */}
+          <div className="space-y-2.5">
+            <div className="h-4 w-full rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            <div className="h-4 w-[88%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            <div className="h-4 w-2/3 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+          </div>
+        </div>
+
+        {/* Right column skeleton — Education */}
+        <div className="space-y-5">
+          {/* "Education" heading */}
+          <div className="h-8 w-36 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          {/* Education entries */}
+          {[1, 2].map((n) => (
+            <div key={n} className="mt-5 space-y-2">
+              <div className="h-6 w-3/4 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+              <div className="h-4 w-1/2 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+              <div className="h-4 w-24 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
 
   return (
     <div className="my-36 grid grid-cols-1 gap-[46px] md:grid-cols-2 lg:gap-[84px]">

@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Github } from 'lucide-react';
+import { Github } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="mb-5 mt-10 flex w-full justify-between gap-2 px-4 py-4 text-sm">
+    <footer className="flex w-full justify-between gap-2 px-4 pb-10 pt-20 text-sm bg-primary-light dark:bg-primary-dark">
       <h2>
         © {new Date().getFullYear()} Jesnie Magaling. All rights reserved.
       </h2>
