@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import projectApi from '@/lib/adminProjectApi';
-import Modal from '@/components/Modal';
-import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
-import { makeSlug } from '@/lib/slugify';
-import { Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { isAdminLoggedIn } from '@/lib/checkAdmin';
+import { useEffect, useState } from "react";
+import projectApi from "@/lib/adminProjectApi";
+import Modal from "@/components/Modal";
+import { PrimaryButton, SecondaryButton } from "@/components/CustomButtons";
+import { makeSlug } from "@/lib/slugify";
+import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { isAdminLoggedIn } from "@/lib/checkAdmin";
 
 interface Project {
   id: string;
@@ -18,6 +18,7 @@ interface Project {
   linkRepo: string;
   linkLive: string;
   image: string;
+  images: string[];
   createdAt: string;
 }
 
@@ -27,17 +28,19 @@ export default function AdminProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    slug: '',
-    stack: '',
-    linkRepo: '',
-    linkLive: '',
-    image: '',
+    name: "",
+    description: "",
+    slug: "",
+    stack: "",
+    linkRepo: "",
+    linkLive: "",
+    image: "",
+    images: [] as string[],
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     setChecking(false);
@@ -46,11 +49,13 @@ export default function AdminProjects() {
   // Fetch all projects
   const fetchProjects = async (signal?: AbortSignal) => {
     try {
-      const res = await projectApi.get('/', { signal });
+      const res = await projectApi.get("/", { signal });
       setProjects(res.data || []);
     } catch (error: any) {
-      if (error.name === 'CanceledError') return;
-      console.error('Error fetching projects:', error);
+      if (error.name === "CanceledError") return;
+      console.error("Error fetching projects:", error);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -63,13 +68,14 @@ export default function AdminProjects() {
   const handleAdd = () => {
     setEditId(null);
     setForm({
-      name: '',
-      description: '',
-      slug: '',
-      stack: '',
-      linkRepo: '',
-      linkLive: '',
-      image: '',
+      name: "",
+      description: "",
+      slug: "",
+      stack: "",
+      linkRepo: "",
+      linkLive: "",
+      image: "",
+      images: [],
     });
     setModalOpen(true);
   };
@@ -80,10 +86,11 @@ export default function AdminProjects() {
       name: project.name,
       description: project.description,
       slug: project.slug,
-      stack: project.stack.join(', '),
+      stack: project.stack.join(", "),
       linkRepo: project.linkRepo,
       linkLive: project.linkLive,
       image: project.image,
+      images: project.images || [],
     });
     setModalOpen(true);
   };
@@ -101,20 +108,54 @@ export default function AdminProjects() {
     // Upload to server
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const res = await fetch('/api/upload/project', {
-        method: 'POST',
+      const res = await fetch("/api/upload/project", {
+        method: "POST",
         body: formData,
       });
       const data = await res.json();
       if (data.url) setForm((prev) => ({ ...prev, image: data.url }));
     } catch (err) {
-      console.error('Upload failed', err);
+      console.error("Upload failed", err);
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleGalleryFileChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
+    setUploading(true);
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload/project", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.url) {
+          setForm((prev) => ({ ...prev, images: [...prev.images, data.url] }));
+        }
+      } catch (err) {
+        console.error("Gallery upload failed", err);
+      }
+    }
+    e.target.value = "";
+    setUploading(false);
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
   const saveProject = async () => {
@@ -124,46 +165,80 @@ export default function AdminProjects() {
     try {
       const payload = {
         ...form,
-        stack: form.stack.split(',').map((s) => s.trim()),
+        stack: form.stack.split(",").map((s) => s.trim()),
       };
       if (!editId) {
         payload.slug = makeSlug(payload.name);
-        await projectApi.post('/', payload);
+        await projectApi.post("/", payload);
       } else {
-        await projectApi.put('/', { id: editId, ...payload });
+        await projectApi.put("/", { id: editId, ...payload });
       }
 
       setModalOpen(false);
       setForm({
-        name: '',
-        description: '',
-        slug: '',
-        stack: '',
-        linkRepo: '',
-        linkLive: '',
-        image: '',
+        name: "",
+        description: "",
+        slug: "",
+        stack: "",
+        linkRepo: "",
+        linkLive: "",
+        image: "",
+        images: [],
       });
       setEditId(null);
       fetchProjects();
     } catch (error) {
-      console.error('Error saving project:', error);
+      console.error("Error saving project:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const deleteProject = async (slug: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!confirm("Are you sure you want to delete this project?")) return;
     try {
       await projectApi.delete(`/?slug=${slug}`);
       fetchProjects();
     } catch (error) {
-      console.error('Error deleting project:', error);
+      console.error("Error deleting project:", error);
     }
   };
 
-  if (checking) {
-    return <p>Loading projects...</p>;
+  if (checking || loadingData) {
+    return (
+      <div className="animate-pulse mt-20">
+        {/* Header row skeleton */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-8 w-24 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-9 w-28 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+
+        {/* Project row skeletons */}
+        <ul className="space-y-4">
+          {[1, 2, 3].map((n) => (
+            <li
+              key={n}
+              className="flex flex-col gap-4 p-4 border rounded border-gray-200 dark:border-[rgba(255,255,255,0.06)] md:flex-row md:items-center md:justify-between"
+            >
+              <div className="flex items-center gap-4 md:w-3/4">
+                <div className="h-40 w-32 flex-shrink-0 rounded-lg bg-gray-200 dark:bg-secondary-dark sm:w-64" />
+                <div className="flex flex-col gap-2 flex-1">
+                  <div className="h-5 w-1/2 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+                  <div className="h-3.5 w-full rounded-full bg-gray-200 dark:bg-secondary-dark" />
+                  <div className="h-3.5 w-[90%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+                  <div className="h-3.5 w-3/4 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+                  <div className="h-3 w-2/5 rounded-full bg-gray-200 dark:bg-secondary-dark mt-1" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <div className="h-9 w-16 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+                <div className="h-9 w-16 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   }
 
   return (
@@ -195,8 +270,8 @@ export default function AdminProjects() {
                   {project.description}
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
-                  <span className="font-medium">Stack:</span>{' '}
-                  {project.stack.join(', ')}
+                  <span className="font-medium">Stack:</span>{" "}
+                  {project.stack.join(", ")}
                 </p>
                 <div className="flex gap-3 mt-2">
                   {project.linkRepo && (
@@ -240,24 +315,29 @@ export default function AdminProjects() {
           onClose={() => {
             setModalOpen(false);
             setForm({
-              name: '',
-              description: '',
-              slug: '',
-              stack: '',
-              linkRepo: '',
-              linkLive: '',
-              image: '',
+              name: "",
+              description: "",
+              slug: "",
+              stack: "",
+              linkRepo: "",
+              linkLive: "",
+              image: "",
+              images: [],
             });
             setEditId(null);
           }}
-          title={editId ? 'Edit Project' : 'Add Project'}
+          title={editId ? "Edit Project" : "Add Project"}
         >
-          <div className="space-y-4">
-            {/* Image Upload */}
+          {/* Scrollable form fields */}
+          <div className="max-h-[58vh] overflow-y-auto pr-1 space-y-4">
+            {/* Cover Image Upload */}
             <div className="flex flex-col items-center justify-center flex-1 min-w-[250px] mt-4">
+              <label className="mb-1 w-full text-sm font-medium">
+                Cover Image
+              </label>
               <label
                 htmlFor="image"
-                className="flex flex-col items-center justify-center w-full h-40 p-4 text-gray-500 transition border-2 border-gray-300 border-dashed cursor-pointer rounded-xl hover:border-gray-400"
+                className="flex flex-col items-center justify-center w-full h-40 p-4 text-gray-500 transition border-2 border-gray-300 border-dashed cursor-pointer rounded-xl hover:border-gray-400 dark:border-[rgba(255,255,255,0.06)]"
               >
                 {form.image ? (
                   <img
@@ -269,7 +349,7 @@ export default function AdminProjects() {
                   <div className="flex flex-col items-center justify-center">
                     <Upload size={28} strokeWidth={1.5} className="mb-2" />
                     <span className="font-medium text-gray-500">
-                      Upload Image
+                      Upload Cover Image
                     </span>
                   </div>
                 )}
@@ -286,6 +366,53 @@ export default function AdminProjects() {
               {uploading && (
                 <p className="mt-2 text-sm text-gray-500">Uploading...</p>
               )}
+            </div>
+
+            {/* Gallery Images */}
+            <div className="flex flex-col">
+              <label className="mb-2 text-sm font-medium">
+                Gallery Images{" "}
+                <span className="font-normal text-gray-400">
+                  (optional — shown in detail page slider)
+                </span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {form.images.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative h-16 w-24 overflow-hidden rounded-lg border border-gray-300 dark:border-[rgba(255,255,255,0.06)]"
+                  >
+                    <img
+                      src={img}
+                      alt={`Gallery ${idx + 1}`}
+                      className="h-full w-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryImage(idx)}
+                      className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/60 text-xs text-white hover:bg-black/80"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+
+                {/* Add more images button */}
+                <label
+                  htmlFor="gallery"
+                  className="flex h-16 w-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 text-gray-500 transition hover:border-gray-400 dark:border-[rgba(255,255,255,0.06)]"
+                >
+                  <Upload size={18} />
+                  <input
+                    type="file"
+                    id="gallery"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleGalleryFileChange}
+                  />
+                </label>
+              </div>
             </div>
 
             {/* Project Name */}
@@ -359,33 +486,34 @@ export default function AdminProjects() {
                 className="w-full rounded-md border-2 border-gray-300 bg-transparent px-3 py-2 text-sm placeholder-[#7E7D7E] focus:outline-none focus:border-gray-600 dark:border-[rgba(255,255,255,0.06)] dark:focus:border-gray-400"
               />
             </div>
+          </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-2 mt-3">
-              <SecondaryButton
-                onClick={() => {
-                  setModalOpen(false);
-                  setForm({
-                    name: '',
-                    description: '',
-                    slug: '',
-                    stack: '',
-                    linkRepo: '',
-                    linkLive: '',
-                    image: '',
-                  });
-                  setEditId(null);
-                }}
-              >
-                Cancel
-              </SecondaryButton>
-              <PrimaryButton
-                onClick={saveProject}
-                disabled={!form.name || !form.image || loading || uploading}
-              >
-                {loading ? 'Saving...' : editId ? 'Update' : 'Add'}
-              </PrimaryButton>
-            </div>
+          {/* Actions — always visible outside scroll area */}
+          <div className="flex justify-end gap-2 mt-4">
+            <SecondaryButton
+              onClick={() => {
+                setModalOpen(false);
+                setForm({
+                  name: "",
+                  description: "",
+                  slug: "",
+                  stack: "",
+                  linkRepo: "",
+                  linkLive: "",
+                  image: "",
+                  images: [],
+                });
+                setEditId(null);
+              }}
+            >
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton
+              onClick={saveProject}
+              disabled={!form.name || !form.image || loading || uploading}
+            >
+              {loading ? "Saving..." : editId ? "Update" : "Add"}
+            </PrimaryButton>
           </div>
         </Modal>
       )}

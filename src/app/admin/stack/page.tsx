@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import stackApi from '@/lib/adminStackApi';
-import Modal from '@/components/Modal';
-import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
-import { Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { isAdminLoggedIn } from '@/lib/checkAdmin';
+import { useEffect, useState } from "react";
+import stackApi from "@/lib/adminStackApi";
+import Modal from "@/components/Modal";
+import { PrimaryButton, SecondaryButton } from "@/components/CustomButtons";
+import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { isAdminLoggedIn } from "@/lib/checkAdmin";
 
 interface TechItem {
   id: string;
@@ -22,13 +22,14 @@ export default function TechStackPage() {
   const [items, setItems] = useState<TechItem[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    icon: '',
-    category: '',
-    link: '',
+    name: "",
+    icon: "",
+    category: "",
+    link: "",
   });
   const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     setChecking(false);
@@ -37,11 +38,13 @@ export default function TechStackPage() {
   // Fetch all tech stack items
   const fetchItems = async (signal?: AbortSignal) => {
     try {
-      const res = await stackApi.get('/', { signal });
+      const res = await stackApi.get("/", { signal });
       setItems(res.data || []);
     } catch (error: any) {
-      if (error.name === 'CanceledError') return;
-      console.error('Error fetching tech stack:', error);
+      if (error.name === "CanceledError") return;
+      console.error("Error fetching tech stack:", error);
+    } finally {
+      if (!signal?.aborted) setLoadingData(false);
     }
   };
 
@@ -53,7 +56,7 @@ export default function TechStackPage() {
 
   const handleAdd = () => {
     setEditId(null);
-    setForm({ name: '', icon: '', category: '', link: '' });
+    setForm({ name: "", icon: "", category: "", link: "" });
     setModalOpen(true);
   };
 
@@ -62,8 +65,8 @@ export default function TechStackPage() {
     setForm({
       name: item.name,
       icon: item.icon,
-      category: item.category || '',
-      link: item.link || '',
+      category: item.category || "",
+      link: item.link || "",
     });
     setModalOpen(true);
   };
@@ -82,11 +85,11 @@ export default function TechStackPage() {
 
     // Upload to server
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const res = await fetch('/api/upload-icon', {
-        method: 'POST',
+      const res = await fetch("/api/upload-icon", {
+        method: "POST",
         body: formData,
       });
       const data = await res.json();
@@ -94,7 +97,7 @@ export default function TechStackPage() {
         setForm((prev) => ({ ...prev, icon: data.url })); // final URL for saving
       }
     } catch (err) {
-      console.error('Upload failed', err);
+      console.error("Upload failed", err);
     }
   };
 
@@ -104,33 +107,60 @@ export default function TechStackPage() {
 
     try {
       if (editId) {
-        await stackApi.put('/', { id: editId, ...form });
+        await stackApi.put("/", { id: editId, ...form });
       } else {
-        await stackApi.post('/', form);
+        await stackApi.post("/", form);
       }
       setModalOpen(false);
-      setForm({ name: '', icon: '', category: '', link: '' });
+      setForm({ name: "", icon: "", category: "", link: "" });
       setEditId(null);
       fetchItems();
     } catch (error) {
-      console.error('Error saving item:', error);
+      console.error("Error saving item:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const removeItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this item?')) return;
+    if (!confirm("Are you sure you want to delete this item?")) return;
     try {
       await stackApi.delete(`/?id=${id}`);
       fetchItems();
     } catch (error) {
-      console.error('Error deleting item:', error);
+      console.error("Error deleting item:", error);
     }
   };
 
-  if (checking) {
-    return <p>Loading stack...</p>;
+  if (checking || loadingData) {
+    return (
+      <div className="animate-pulse mt-20">
+        {/* Header row skeleton */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="h-8 w-28 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-9 w-32 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+
+        {/* List row skeletons */}
+        <ul className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <li
+              key={i}
+              className="flex items-center justify-between p-4 border rounded border-gray-200 dark:border-[rgba(255,255,255,0.06)]"
+            >
+              <div className="flex items-center gap-4">
+                <div className="h-8 w-8 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+                <div className="h-4 w-28 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+              </div>
+              <div className="flex gap-2">
+                <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+                <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   }
 
   return (
@@ -176,10 +206,10 @@ export default function TechStackPage() {
           open={modalOpen}
           onClose={() => {
             setModalOpen(false);
-            setForm({ name: '', icon: '', category: '', link: '' });
+            setForm({ name: "", icon: "", category: "", link: "" });
             setEditId(null);
           }}
-          title={editId ? 'Edit Tech Stack' : 'Add Tech Stack'}
+          title={editId ? "Edit Tech Stack" : "Add Tech Stack"}
         >
           <div className="space-y-4">
             {/* Icon Upload */}
@@ -256,7 +286,7 @@ export default function TechStackPage() {
               <SecondaryButton
                 onClick={() => {
                   setModalOpen(false);
-                  setForm({ name: '', icon: '', category: '', link: '' });
+                  setForm({ name: "", icon: "", category: "", link: "" });
                   setEditId(null);
                 }}
               >
@@ -266,7 +296,7 @@ export default function TechStackPage() {
                 onClick={saveItem}
                 disabled={!form.name || !form.icon || loading}
               >
-                {loading ? 'Saving...' : editId ? 'Update' : 'Add'}
+                {loading ? "Saving..." : editId ? "Update" : "Add"}
               </PrimaryButton>
             </div>
           </div>

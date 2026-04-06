@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import aboutApi from '@/lib/adminAboutApi';
-import Modal from '@/components/Modal';
-import { PrimaryButton, SecondaryButton } from '@/components/CustomButtons';
-import { useRouter } from 'next/navigation';
-import { isAdminLoggedIn } from '@/lib/checkAdmin';
+import { useEffect, useState } from "react";
+import aboutApi from "@/lib/adminAboutApi";
+import Modal from "@/components/Modal";
+import { PrimaryButton, SecondaryButton } from "@/components/CustomButtons";
+import { useRouter } from "next/navigation";
+import { isAdminLoggedIn } from "@/lib/checkAdmin";
 
 interface Education {
   school: string;
@@ -25,26 +25,27 @@ export default function AdminAboutPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [aboutData, setAboutData] = useState<About>({
-    id: '',
-    about: '',
-    goal: '',
+    id: "",
+    about: "",
+    goal: "",
     education: [],
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [editType, setEditType] = useState<
-    'about' | 'goal' | 'education' | null
+    "about" | "goal" | "education" | null
   >(null);
   const [editEducationIndex, setEditEducationIndex] = useState<number | null>(
-    null
+    null,
   );
-  const [formValue, setFormValue] = useState<string>('');
+  const [formValue, setFormValue] = useState<string>("");
   const [eduForm, setEduForm] = useState<Education>({
-    school: '',
-    degree: '',
+    school: "",
+    degree: "",
     startYear: 2022,
     endYear: 2026,
   });
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     setChecking(false);
@@ -52,14 +53,16 @@ export default function AdminAboutPage() {
 
   const loadAbout = async () => {
     try {
-      const res = await aboutApi.get('/');
+      const res = await aboutApi.get("/");
       setAboutData(res.data);
     } catch (error: any) {
-      if (error.code !== 'ECONNABORTED') {
-        console.error('Error fetching about:', error);
+      if (error.code !== "ECONNABORTED") {
+        console.error("Error fetching about:", error);
       } else {
-        console.log('Request was aborted, probably due to page navigation.');
+        console.log("Request was aborted, probably due to page navigation.");
       }
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -68,20 +71,20 @@ export default function AdminAboutPage() {
   }, []);
 
   const openModal = (
-    type: 'about' | 'goal' | 'education',
-    index: number | null = null
+    type: "about" | "goal" | "education",
+    index: number | null = null,
   ) => {
     setEditType(type);
-    if (type === 'education') {
+    if (type === "education") {
       if (index !== null) {
         setEditEducationIndex(index);
         setEduForm(aboutData.education[index]);
       } else {
         setEditEducationIndex(null);
-        setEduForm({ school: '', degree: '', startYear: 2022, endYear: 2026 });
+        setEduForm({ school: "", degree: "", startYear: 2022, endYear: 2026 });
       }
     } else {
-      setFormValue(type === 'about' ? aboutData.about : aboutData.goal);
+      setFormValue(type === "about" ? aboutData.about : aboutData.goal);
     }
     setModalOpen(true);
   };
@@ -89,18 +92,18 @@ export default function AdminAboutPage() {
   const saveField = async () => {
     setLoading(true);
     try {
-      if (editType === 'about' || editType === 'goal') {
+      if (editType === "about" || editType === "goal") {
         const payload = { [editType]: formValue };
-        await aboutApi.put('/', payload); // use aboutApi
+        await aboutApi.put("/", payload); // use aboutApi
         setAboutData({ ...aboutData, ...payload });
-      } else if (editType === 'education') {
+      } else if (editType === "education") {
         const newEducation = [...aboutData.education];
         if (editEducationIndex !== null) {
           newEducation[editEducationIndex] = eduForm;
         } else {
           newEducation.push(eduForm);
         }
-        await aboutApi.put('/', { education: newEducation }); // use aboutApi
+        await aboutApi.put("/", { education: newEducation }); // use aboutApi
         setAboutData({ ...aboutData, education: newEducation });
       }
     } catch (error) {
@@ -112,18 +115,64 @@ export default function AdminAboutPage() {
   };
 
   const deleteEducation = async (index: number) => {
-    if (!confirm('Delete this education entry?')) return;
+    if (!confirm("Delete this education entry?")) return;
     const newEducation = aboutData.education.filter((_, i) => i !== index);
     try {
-      await aboutApi.put('/', { education: newEducation }); // use aboutApi
+      await aboutApi.put("/", { education: newEducation }); // use aboutApi
       setAboutData({ ...aboutData, education: newEducation });
     } catch (error) {
       console.error(error);
     }
   };
 
-  if (checking) {
-    return <p>Loading about...</p>;
+  if (checking || loadingData) {
+    return (
+      <div className="animate-pulse mt-20">
+        {/* About section skeleton */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-8 w-28 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+        <div className="p-4 mb-6 border border-gray-200 rounded-md dark:border-[rgba(255,255,255,0.06)] space-y-2">
+          <div className="h-3.5 w-full rounded-full bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-3.5 w-[92%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-3.5 w-3/4 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+
+        {/* Goal section skeleton */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-7 w-16 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+        <div className="p-4 mb-6 border border-gray-200 rounded-md dark:border-[rgba(255,255,255,0.06)] space-y-2">
+          <div className="h-3.5 w-full rounded-full bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-3.5 w-[85%] rounded-full bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+
+        {/* Education section skeleton */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="h-7 w-24 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+          <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+        </div>
+        <div className="space-y-2">
+          {[1, 2].map((n) => (
+            <div
+              key={n}
+              className="flex items-center justify-between p-4 border border-gray-200 rounded-md dark:border-[rgba(255,255,255,0.06)]"
+            >
+              <div className="space-y-1.5">
+                <div className="h-4 w-48 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+                <div className="h-3.5 w-64 rounded-full bg-gray-200 dark:bg-secondary-dark" />
+              </div>
+              <div className="flex gap-2">
+                <div className="h-9 w-14 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+                <div className="h-9 w-16 rounded-lg bg-gray-200 dark:bg-secondary-dark" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -131,25 +180,25 @@ export default function AdminAboutPage() {
       {/* About Section */}
       <div className="flex items-center justify-between mt-20 mb-2">
         <h1 className="text-2xl font-bold">About Me</h1>
-        <PrimaryButton onClick={() => openModal('about')}>Edit</PrimaryButton>
+        <PrimaryButton onClick={() => openModal("about")}>Edit</PrimaryButton>
       </div>
       <div className="p-4 mb-6 border border-gray-300 rounded-md dark:border-[rgba(255,255,255,0.06)]">
-        {aboutData.about || 'No content yet'}
+        {aboutData.about || "No content yet"}
       </div>
 
       {/* Goal Section */}
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Goal</h2>
-        <PrimaryButton onClick={() => openModal('goal')}>Edit</PrimaryButton>
+        <PrimaryButton onClick={() => openModal("goal")}>Edit</PrimaryButton>
       </div>
       <div className="p-4 mb-6 border border-gray-300 rounded-md dark:border-[rgba(255,255,255,0.06)]">
-        {aboutData.goal || 'No content yet'}
+        {aboutData.goal || "No content yet"}
       </div>
 
       {/* Education Section */}
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xl font-semibold">Education</h2>
-        <PrimaryButton onClick={() => openModal('education', null)}>
+        <PrimaryButton onClick={() => openModal("education", null)}>
           Add
         </PrimaryButton>
       </div>
@@ -168,7 +217,7 @@ export default function AdminAboutPage() {
             <div className="flex gap-2 ml-2">
               <PrimaryButton
                 className="px-3 py-1 text-sm"
-                onClick={() => openModal('education', i)}
+                onClick={() => openModal("education", i)}
               >
                 Edit
               </PrimaryButton>
@@ -188,16 +237,16 @@ export default function AdminAboutPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         title={
-          editType === 'about'
-            ? 'Edit About'
-            : editType === 'goal'
-            ? 'Edit Goal'
-            : editEducationIndex !== null
-            ? 'Edit Education'
-            : 'Add Education'
+          editType === "about"
+            ? "Edit About"
+            : editType === "goal"
+              ? "Edit Goal"
+              : editEducationIndex !== null
+                ? "Edit Education"
+                : "Add Education"
         }
       >
-        {editType === 'about' || editType === 'goal' ? (
+        {editType === "about" || editType === "goal" ? (
           <textarea
             rows={6}
             value={formValue}
@@ -274,7 +323,7 @@ export default function AdminAboutPage() {
             Cancel
           </SecondaryButton>
           <PrimaryButton onClick={saveField} disabled={loading}>
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? "Saving..." : "Save"}
           </PrimaryButton>
         </div>
       </Modal>
